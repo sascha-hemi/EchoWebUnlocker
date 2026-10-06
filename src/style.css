@@ -1,0 +1,19 @@
+:root { color-scheme: light dark; --bg:#fff; --fg:#1a1a1a; --muted:#666; --card:#f4f4f5; --accent:#0b6bcb; --danger:#c62828; }
+@media (prefers-color-scheme: dark) { :root { --bg:#16171a; --fg:#e8e8ea; --muted:#9a9aa2; --card:#22242a; --accent:#5aa2f0; --danger:#ef6a6a; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; }
+main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { margin: 0 0 4px; } .sub { color: var(--muted); margin: 0 0 24px; }
+ol.steps { display:flex; gap:6px; list-style:none; padding:0; margin:0 0 24px; flex-wrap:wrap; }
+ol.steps li { font-size:13px; padding:2px 10px; border-radius:99px; background:var(--card); color:var(--muted); }
+ol.steps li.on { background:var(--accent); color:#fff; } ol.steps li.done { color:var(--fg); }
+.cards { display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
+.card { background:var(--card); border:2px solid transparent; border-radius:10px; padding:14px; text-align:left; font:inherit; color:inherit; cursor:pointer; }
+.card:hover:not(:disabled) { border-color: var(--accent); } .card:disabled { opacity:.5; cursor:not-allowed; }
+.card b { display:block; } .card small { color:var(--muted); }
+.warn { border-left:4px solid var(--danger); background:var(--card); padding:10px 14px; border-radius:6px; margin:12px 0; }
+button.primary { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:10px 18px; font:inherit; cursor:pointer; }
+button.primary:disabled { opacity:.5; cursor:not-allowed; } button.link { background:none; border:0; color:var(--accent); cursor:pointer; font:inherit; padding:0; }
+.row { display:flex; gap:12px; align-items:center; margin:16px 0; flex-wrap:wrap; }
+pre.log { background:#0d0e10; color:#d6d6d6; padding:12px; border-radius:8px; max-height:280px; overflow:auto; font-size:13px; white-space:pre-wrap; }
+progress { width:100%; } label.file { display:block; margin:12px 0; } footer { margin-top:40px; color:var(--muted); font-size:13px; }
