@@ -14,13 +14,13 @@ Implemented and unit-tested with mocks, never run against real hardware:
 - FireOS and root steps ([src/steps/firmware-flash.ts](src/steps/firmware-flash.ts)), each preceded by a device check.
 - ZIP loader with SHA-256 verification ([src/package-loader.ts](src/package-loader.ts)).
 - Filename validation and the partition blocklist.
+- TWRP fastboot step ([src/steps/twrp.ts](src/steps/twrp.ts)) and tools tab ([src/ui/tools-view.ts](src/ui/tools-view.ts), logic in [src/steps/tools.ts](src/steps/tools.ts)). The wizard does not call the TWRP step yet, because it is only needed after the BROM routes. The tools tab can run it.
+- `critical()` in the wizard starts the work before `render()`, because `render()` rebuilds the DOM and discards `<input>` values.
 - Wizard UI ([src/ui/wizard.ts](src/ui/wizard.ts)) with i18n ([src/i18n/](src/i18n/)). The languages are en, de, nl, fr, it and pl. The language is picked from the saved choice, then `navigator.languages`, then English. `en.ts` defines the key set and the other dictionaries are typed against it. Library-level error messages are English only.
 
 Still missing:
 - Real `manifests/*.json`. Hashes need the actual release ZIPs.
-- The fastboot step (TWRP flash plus `reboot recovery`).
 - The amonet and kamakiri BROM ports.
-- The tools tab.
 
 ## Commands
 

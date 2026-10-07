@@ -8,11 +8,13 @@ import { WebUsbAdb } from "../transport/adb-webusb";
 import { WebUsbFastboot } from "../transport/fastboot-webusb";
 import { LANGS, getLang, setLang, t, type Lang } from "../i18n";
 import { browserSupport } from "./browser-check";
+import { toolsBody, wireTools, type ToolsCtx } from "./tools-view";
 
 type Step = "disclaimer" | "device" | "route" | "prepare" | "exploit" | "flash" | "root" | "done";
 const ORDER: Step[] = ["disclaimer", "device", "route", "prepare", "exploit", "flash", "root", "done"];
 
 interface State {
+  mode: "wizard" | "tools";
   step: Step;
   device?: DeviceInfo;
   route?: Route;
@@ -22,7 +24,7 @@ interface State {
   log: string[];
   progress?: number;
 }
-const st: State = { step: "disclaimer", busy: false, log: [] };
+const st: State = { mode: "wizard", step: "disclaimer", busy: false, log: [] };
 let root: HTMLElement;
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -32,8 +34,11 @@ const guard = (e: BeforeUnloadEvent) => e.preventDefault();
 
 /** Runs a critical phase with a beforeunload warning (spec §6). */
 async function critical(fn: () => Promise<void>) {
-  st.busy = true; window.addEventListener("beforeunload", guard); render();
-  try { await fn(); } catch (e) { log(t("error", { error: e instanceof Error ? e.message : String(e) })); }
+  st.busy = true; window.addEventListener("beforeunload", guard);
+  // Start fn() before render(): its synchronous part reads <input> values that render() would discard.
+  const running = fn();
+  render();
+  try { await running; } catch (e) { log(t("error", { error: e instanceof Error ? e.message : String(e) })); }
   finally { st.busy = false; window.removeEventListener("beforeunload", guard); render(); }
 }
 
@@ -156,8 +161,17 @@ function wire() {
   }));
 }
 
+const toolsCtx = (): ToolsCtx => ({
+  root, device: st.device, pkg: st.pkg, busy: st.busy,
+  logHtml: `<pre class="log">${esc(st.log.join("\n"))}</pre>`,
+  setDevice: (d) => { st.device = d; },
+  setPkg: (p) => { st.pkg = p; },
+  log, critical, rerender: render,
+});
+
 function render() {
   const idx = ORDER.indexOf(st.step);
+  const tools = st.mode === "tools";
   root.innerHTML = `<main>
     <div class="row" style="justify-content:space-between;margin-top:0">
       <h1>${t("title")}</h1>
@@ -165,14 +179,22 @@ function render() {
         `<option value="${l}" ${l === getLang() ? "selected" : ""}>${LANGS[l].name}</option>`).join("")}</select></label>
     </div>
     <p class="sub">${t("subtitle")}</p>
-    <ol class="steps">${ORDER.map((k, i) => `<li class="${i === idx ? "on" : i < idx ? "done" : ""}">${t(`step.${k}`)}</li>`).join("")}</ol>
-    ${body()}
+    <div class="row"><button class="${tools ? "link" : "primary"}" id="mode-wizard">${t("mode.wizard")}</button>
+      <button class="${tools ? "primary" : "link"}" id="mode-tools">${t("mode.tools")}</button></div>
+    ${tools ? "" : `<ol class="steps">${ORDER.map((k, i) => `<li class="${i === idx ? "on" : i < idx ? "done" : ""}">${t(`step.${k}`)}</li>`).join("")}</ol>`}
+    ${tools ? toolsBody(toolsCtx()) : body()}
     <footer>${t("footer")}</footer></main>`;
   root.querySelector<HTMLSelectElement>("#lang")!.addEventListener("change", (e) => {
     setLang((e.target as HTMLSelectElement).value as Lang);
     render();
   });
-  wire();
+  for (const m of ["wizard", "tools"] as const) {
+    root.querySelector(`#mode-${m}`)!.addEventListener("click", () => {
+      if (st.busy || st.mode === m) return;
+      st.mode = m; st.log = []; render();
+    });
+  }
+  if (tools) wireTools(toolsCtx()); else wire();
 }
 
 export function mountWizard(el: HTMLElement) { root = el; render(); }

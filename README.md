@@ -19,7 +19,7 @@ A browser-based tool that guides you through unlocking, installing TWRP, flashin
 | Wizard UI, 6 languages (en, de, nl, fr, it, pl) | Implemented, only partly reviewed |
 | amonet BROM (WebSerial), kamakiri BROM (WebUSB) | **Not implemented** |
 | SHA-256 manifests for release packages | **Not implemented** – package integrity is not verified yet |
-| TWRP fastboot step, tools tab | **Not implemented** |
+| TWRP fastboot step, tools tab (flash TWRP, boot recovery, partition flash with blocklist, slot, factory reset) | Implemented, untested on hardware |
 
 ## Supported devices
 
