@@ -147,11 +147,19 @@ Recovery wird von kaeru intern auf die `swdl`-Partition umgemappt – Tool sende
 shell: twrp wipe cache
 shell: twrp wipe data
 push  <firmware.bin> → /sdcard/update.zip       (Fortschrittsbalken, Dateien ~300–500 MB)
-shell: twrp install /sdcard/update.zip           (Exit-Code/Output prüfen)
-shell: s=$(bcbtool get_active); case $s in a) bcbtool set_active b;; b) bcbtool set_active a;; *) echo "unexpected: $s";; esac
+shell: twrp install /sdcard/update.zip           (Output: "inactive slot: X" → X merken)
+shell: bcbtool get_active                        (≠ x → bcbtool set_active x, erneut prüfen)
 reboot recovery  → auf ADB-Reconnect warten (WebUSB-Gerät neu wählen / getDevices)
-shell: twrp install /sdcard/update.zip
+shell: twrp install /sdcard/update.zip           (muss den ANDEREN Slot melden, sonst Abbruch)
+shell: bcbtool get_active                        (wie oben)
+reboot recovery
 ```
+
+TWRP schreibt immer den Slot, aus dem es **nicht** gestartet ist, und stellt den
+Wechsel dorthin bei der ersten Installation einer Recovery-Sitzung selbst im BCB
+ein. Ein blindes Umschalten mit `bcbtool` nach der Installation macht diesen
+Wechsel rückgängig; die zweite Installation landet dann wieder im selben Slot
+(radar, 2026-10-10: drei Installationen, alle nach B, A nie geschrieben).
 
 Validierungen vor dem Flash:
 - Dateiname enthält `kindle-<codename>` (bei biscuit/radar/donut `<codename>_puffin`) → sonst Warnung/Block.
